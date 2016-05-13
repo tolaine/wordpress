@@ -1,0 +1,10 @@
+
+1. Install plugin The Events Calendar
+
+2. Copy "tribe-events" folder under current Theme
+
+3. Add functions to functions.php of that Theme
+
+
+
+

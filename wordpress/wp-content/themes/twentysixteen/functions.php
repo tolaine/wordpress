@@ -422,8 +422,7 @@ add_filter( 'widget_tag_cloud_args', 'twentysixteen_widget_tag_cloud_args' );
 
 
 
-//  KIELISTYKSET 
-
+//  Event Calendar Translations
 
 /**
  * Modify the "bases" used to form event URLs for various views. Wire up our code used to modify event slugs in the rewrite rules.
