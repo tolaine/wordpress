@@ -490,7 +490,7 @@ function tribe_rss_feed_add_eventdate() {
 
 	?>
 	<ev:tribe_event_meta xmlns:ev="Event">
-		<ev:eventId><?php echo $event->ID;  ?></ev:eventId>
+		<ev:eventId><?php echo $event->ID; ?></ev:eventId>
 		<ev:title><?php echo wp_kses_post( $event->post_title ); ?></ev:title>
 		<ev:permalink><?php echo tribe_get_event_link( $event->ID ); ?></ev:permalink>
 		<ev:image><?php echo $image_src; ?></ev:image>

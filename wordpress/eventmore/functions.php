@@ -39,64 +39,56 @@ add_action('rss2_item','tribe_rss_feed_add_eventdate');
 add_action('commentsrss2_item','tribe_rss_feed_add_eventdate');
  
 function tribe_rss_feed_add_eventdate() {
-  if ( ! tribe_is_event() ) return;
-  $post_id = get_the_ID();
-  ?>
-  <ev:tribe_event_meta xmlns:ev="Event">
-    <ev:json><?php echo event_to_json($post_id); ?></ev:json>
-  </ev:tribe_event_meta>
- 
-<?php }
+ 	if ( ! tribe_is_event() ) return;
+  	$post_id = get_the_ID();
 
-/**
- * Returns json representation of one Tribe Event. Full description of event should
- * already be visible in post RSS as xml format. This JSON cointains all other event
- * data required by Eventmore platform.
- *
- * @category Events
- * @param $event
- * @return string
- */
-function event_to_json( $event = null ) {
+	if ( is_null( $post_id ) ) return;
+
+	$event = get_post( $event );
+	if ( ! is_object( $event ) && ! ($event instanceof WP_Post && tribe_is_event( $event->ID )) ) return;
 	
-	$json = array();
-	if ( ! is_null( $event ) ) {
-		$event = get_post( $event );
-		if ( is_object( $event ) && $event instanceof WP_Post && tribe_is_event( $event->ID ) ) {
-			$has_image = false;
-			$image_src = '';
+	$has_image = false;
+	$image_src = '';
 
-			if ( function_exists( 'has_post_thumbnail' ) && has_post_thumbnail( $event->ID ) ) {
-				$has_image = true;
-				$image_arr = wp_get_attachment_image_src( get_post_thumbnail_id( $event->ID ), 'largest' );
-				$image_src = $image_arr[0];
-			}
-			
-			$categories = wp_list_pluck( (array) get_the_terms( $event->ID, Tribe__Events__Main::TAXONOMY ), 'name' );
-			
-			$venue_id = tribe_get_venue_id( $event->ID );
-			$venue_name = tribe_get_venue( $venue_id );
-			$venue_url  = esc_url_raw( get_permalink( $venue_id ) );
-			$venue_addr = tribe_get_address( $venue_id );
-			$venue_zip  = tribe_get_zip( $venue_id );
-			$venue_city = tribe_get_city( $venue_id );
-
-			$json['eventId']    = $event->ID;
-			$json['title']      = wp_kses_post( $event->post_title );
-			$json['permalink']  = tribe_get_event_link( $event->ID );
-			$json['image']      = $image_src;
-			$json['excerpt']    = tribe_events_get_the_excerpt( $event );
-			$json['categories'] = $categories;
-			$json['startTime']  = tribe_get_start_date( $event );
-			$json['endTime']    = tribe_get_end_date( $event );
-			$json['venueName']  = $venue_name;
-			$json['venueUrl']   = $venue_url;
-			$json['venueAddress'] = $venue_addr;
-			$json['venueZip']   = $venue_zip;
-			$json['venueCity']  = $venue_city;
-		}
+	if ( function_exists( 'has_post_thumbnail' ) && has_post_thumbnail( $event->ID ) ) {
+		$has_image = true;
+		$image_arr = wp_get_attachment_image_src( get_post_thumbnail_id( $event->ID ), 'largest' );
+		$image_src = $image_arr[0];
 	}
-	$json = tribe_prepare_for_json_deep( $json );
-	return json_encode( $json );
+			
+	$categories = wp_list_pluck( (array) get_the_terms( $event->ID, Tribe__Events__Main::TAXONOMY ), 'name' );
+	
+	$venue_id = tribe_get_venue_id( $event->ID );
+	$venue_name = tribe_get_venue( $venue_id );
+	$venue_url  = esc_url_raw( get_permalink( $venue_id ) );
+	$venue_addr = tribe_get_address( $venue_id );
+	$venue_zip  = tribe_get_zip( $venue_id );
+	$venue_city = tribe_get_city( $venue_id );
+
+
+	?>
+	<ev:tribe_event_meta xmlns:ev="Event">
+		<ev:eventId><?php echo $event->ID;  ?></ev:eventId>
+		<ev:title><?php echo wp_kses_post( $event->post_title ); ?></ev:title>
+		<ev:permalink><?php echo tribe_get_event_link( $event->ID ); ?></ev:permalink>
+		<ev:image><?php echo $image_src; ?></ev:image>
+		<ev:excerpt><?php echo tribe_events_get_the_excerpt( $event ); ?></ev:excerpt>
+		<ev:categories>
+		<?php foreach ($categories as $cat ) { ?>
+		<ev:category><?php echo $cat; ?></ev:category>
+		<?php } ?>
+		</ev:categories>
+		<ev:startTime><?php echo tribe_get_start_date( $event ); ?></ev:startTime>
+		<ev:endTime><?php echo tribe_get_end_date( $event ); ?></ev:endTime>
+		<ev:venue>
+			<ev:venueName><?php echo $venue_name; ?></ev:venueName>
+			<ev:venueUrl><?php echo $venue_url; ?></ev:venueUrl>
+			<ev:venueAddress><?php echo $venue_addr; ?></ev:venueAddress>
+			<ev:venueZip><?php echo $venue_zip; ?></ev:venueZip>
+			<ev:venueCity><?php echo $venue_city; ?></ev:venueCity>
+		</ev:venue>
+	</ev:tribe_event_meta> 
+	<?php 
 }
+
 
